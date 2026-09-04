@@ -18,7 +18,7 @@ const upload = multer({ storage: storage})
 // [GET] /api/v1/products
 router.get('/',async function (req, res, next) {
   try {
-    let products = await productSchema.find({})
+    let products = await productSchema.find({product_status: true})
 
     res.status(200).json({
       status: 200,
@@ -89,8 +89,8 @@ router.put('/:id',[authToken, isAdmin, upload.single("image")],async function (r
       stock: product.product_stock,
     };
 
-    return res.status(201).json({
-      status: 201,
+    return res.status(200).json({
+      status: 200,
       message: 'Product Update Successfully',
       data: data
     });
@@ -102,5 +102,49 @@ router.put('/:id',[authToken, isAdmin, upload.single("image")],async function (r
       });
   }
 })
+
+//[Delete] /api/v1/products/:id
+router.delete('/:id', [authToken, isAdmin], async function (req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const product = await productSchema.findByIdAndUpdate(
+      id,
+      {
+        product_status: false
+      },
+      {
+        new: true
+      }
+    );
+
+    if (!product) {
+      return res.status(400).json({
+        status: 400,
+        message: 'Product not found',
+        data: null
+      });
+    }
+
+    return res.status(200).json({
+      status: 200,
+      message: 'Product Delete Successfully',
+      data: {
+        product_id: product._id,
+        product_name: product.product_name,
+        product_status: product.product_status
+      }
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal server error',
+      data: null
+    });
+  }
+});
 
 module.exports = router;

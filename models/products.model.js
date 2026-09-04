@@ -21,6 +21,10 @@ const productSchema = new Schema(
         product_stock: {
             type: Number,
             required: true
+        },
+        product_status:{
+             type: Boolean,
+            default: true
         }
     },
     {
