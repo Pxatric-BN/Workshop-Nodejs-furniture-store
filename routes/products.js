@@ -18,7 +18,7 @@ const upload = multer({ storage: storage})
 // [GET] /api/v1/products
 router.get('/',async function (req, res, next) {
   try {
-    let products = await productSchema.find({product_status: true})
+    const products = await productSchema.find({product_status: true})
 
     res.status(200).json({
       status: 200,
@@ -36,7 +36,7 @@ router.get('/',async function (req, res, next) {
   }
 })
 
-//[Post] /api/v1/products
+//[POST] /api/v1/products
 router.post('/',[authToken, isAdmin, upload.single("image")],async function (req, res, next) {
   try {
     const { product_name, product_description, product_price,product_stock } = req.body
@@ -69,7 +69,7 @@ router.post('/',[authToken, isAdmin, upload.single("image")],async function (req
   }
 })
 
-//[Put] /api/v1/products/:id
+//[PUT] /api/v1/products/:id
 router.put('/:id',[authToken, isAdmin, upload.single("image")],async function (req, res, next) {
   try {
     const { id } = req.params
@@ -103,7 +103,7 @@ router.put('/:id',[authToken, isAdmin, upload.single("image")],async function (r
   }
 })
 
-//[Delete] /api/v1/products/:id
+//[DELETE] /api/v1/products/:id
 router.delete('/:id', [authToken, isAdmin], async function (req, res, next) {
   try {
     const { id } = req.params;
@@ -146,5 +146,27 @@ router.delete('/:id', [authToken, isAdmin], async function (req, res, next) {
     });
   }
 });
+
+//[GET] /api/v1/product/:id
+router.get('/:id',async function (req, res,) {
+  try {
+    const { id } = req.params
+    const products = await productSchema.findOne({_id: id,})
+
+    res.status(200).json({
+      status: 200,
+      message: 'success',
+      data: products
+    })
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      status: 500,
+      message: 'Internal server error',
+      data: null
+    })
+  }
+})
 
 module.exports = router;
