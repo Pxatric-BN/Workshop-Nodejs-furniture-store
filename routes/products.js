@@ -37,7 +37,7 @@ router.get('/',async function (req, res, next) {
 })
 
 //[Post] /api/v1/products
-router.post('/',[isAdmin, authToken, upload.single("image")],async function (req, res, next) {
+router.post('/',[authToken, isAdmin, upload.single("image")],async function (req, res, next) {
   try {
     const { product_name, product_description, product_price,product_stock } = req.body
 
@@ -58,6 +58,40 @@ router.post('/',[isAdmin, authToken, upload.single("image")],async function (req
     return res.status(201).json({
       status: 201,
       message: 'Product Created',
+      data: data
+    });
+  } catch (error) {
+      return res.status(500).json({
+        status: 500,
+        message: 'Internal server error',
+        data: null
+      });
+  }
+})
+
+//[Put] /api/v1/products/:id
+router.put('/:id',[authToken, isAdmin, upload.single("image")],async function (req, res, next) {
+  try {
+    const { id } = req.params
+    const { product_name, product_description, product_price,product_stock } = req.body
+
+    const product = await productSchema.findByIdAndUpdate(id,{
+      product_name,
+      product_description,
+      product_price,
+      product_stock,
+    },{new: true});
+
+    const data = {
+      product_name: product.product_name,
+      product_description: product.product_description,
+      product_price: product.product_price,
+      stock: product.product_stock,
+    };
+
+    return res.status(201).json({
+      status: 201,
+      message: 'Product Update Successfully',
       data: data
     });
   } catch (error) {
