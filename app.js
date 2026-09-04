@@ -11,6 +11,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth.js');
 var productsRouter = require('./routes/products')
+var orderRouter = require('./routes/orders')
 var app = express();
 
 //set up cors
@@ -27,8 +28,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/api/v1/users', usersRouter);
-app.use('/api/v1',authRouter);
-app.use('/api/v1/products',productsRouter);
+app.use('/api/v1', authRouter);
+app.use('/api/v1/products', productsRouter);
+app.use('/api/v1/orders', orderRouter)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
