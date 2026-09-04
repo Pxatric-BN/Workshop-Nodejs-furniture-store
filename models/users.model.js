@@ -27,19 +27,16 @@ const userSchema = new Schema({
         required: true,
         unique: true
     },
-    tel: {
-        type: String
-    },
     role: {
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
     },
-    status: {
-        type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        default: 'pending'
+    isApprove: {
+        type: Boolean,
+        default: false
     }
 });
 
 module.exports = mongoose.model('User', userSchema);
+
