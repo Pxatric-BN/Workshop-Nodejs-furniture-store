@@ -19,14 +19,14 @@ Furniture-store/
 ├── bin/
 │   └── www
 ├── middleware/
-│   └── auth.js
+│   └── auth.middleware.js
 ├── models/
 │   ├── orders.model.js
 │   ├── products.model.js
 │   └── users.model.js
 ├── routes/
 │   ├── index.js
-│   ├── login.js
+│   ├── auth.js
 │   ├── users.js
 │   ├── products.js
 │   └── orders.js
