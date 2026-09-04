@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const productSchema = require('../models/products.model')
+const orderSchema = require('../models/orders.model.js')
 const multer = require('multer')
 const {authToken, isAdmin} = require('../middleware/auth.middleware.js')
 
@@ -168,5 +169,91 @@ router.get('/:id',async function (req, res,) {
     })
   }
 })
+
+//[GET] /api/products/:id/orders
+router.get('/:id/orders', async function (req, res, next) {
+  try {
+    const { id } = req.params;
+
+    const orders = await orderSchema.find({
+      'products.product_id': id
+    });
+
+    return res.status(200).json({
+      status: 200,
+      message: 'success',
+      data: orders
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal server error',
+      data: null
+    });
+  }
+});
+
+router.post('/:id/orders', [authToken], async function (req, res, next) {
+  try {
+    const { id } = req.params;
+    const { quantity } = req.body;
+
+    const product = await productSchema.findOne({
+      _id: id,
+      product_status: true
+    });
+
+    if (!product) {
+      return res.status(400).json({
+        status: 400,
+        message: 'Product not found',
+        data: null
+      });
+    }
+
+    if (quantity > product.product_stock) {
+      return res.status(400).json({
+        status: 400,
+        message: 'Order quantity exceeds product stock',
+        data: null
+      });
+    }
+
+    const order = await orderSchema.create({
+      user_id: req.user.userId,
+      products: [
+        {
+          product_id: product._id,
+          quantity: quantity,
+          price: product.product_price
+        }
+      ],
+      total_price: product.product_price * quantity
+    });
+
+
+    product.product_stock -= quantity;
+
+    await product.save();
+
+    return res.status(201).json({
+      status: 201,
+      message: 'Order Created',
+      data: order
+    });
+
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      status: 500,
+      message: 'Internal server error',
+      data: null
+    });
+  }
+});
 
 module.exports = router;
