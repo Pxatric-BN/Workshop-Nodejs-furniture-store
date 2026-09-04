@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const orderSchema = require('../models/orders.model.js')
-const productSchema = require('../models/products.model.js')
-const {authToken, isAdmin} = require('../middleware/auth.middleware.js')
+const { success, errorResponse } = require('../utils/response')
+
 
 // [GET] /api/v1/orders 
 router.get('/', async function (req, res, next) {
@@ -11,25 +11,11 @@ router.get('/', async function (req, res, next) {
     .find({})
     .populate('user_id', 'first_name');
 
-    res.status(200).json({
-      status: 200,
-      message: 'success',
-      data: orders
-    })
+    return success(res, 200, "success", orders);
 
   } catch (error) {
-    console.log(error)
-
-    res.status(500).json({
-      status: 500,
-      message: 'Internal server error',
-      data: null
-    })
+    return errorResponse(res, 500, "Internal server error",);
   }
 })
-
-
-
-
 module.exports = router;
 
