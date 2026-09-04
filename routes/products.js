@@ -4,6 +4,7 @@ const productSchema = require('../models/products.model')
 const orderSchema = require('../models/orders.model.js')
 const multer = require('multer')
 const {authToken, isAdmin} = require('../middleware/auth.middleware.js')
+const { success, errorResponse } = require('../utils/response')
 
 
 const storage = multer.diskStorage({
@@ -21,19 +22,10 @@ router.get('/',async function (req, res, next) {
   try {
     const products = await productSchema.find({product_status: true})
 
-    res.status(200).json({
-      status: 200,
-      message: 'success',
-      data: products
-    })
+    return success(res, 200, "success", products);
 
   } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      status: 500,
-      message: 'error',
-      data: null
-    })
+    return errorResponse(res, 500, "Internal server error");
   }
 })
 
@@ -56,17 +48,10 @@ router.post('/',[authToken, isAdmin, upload.single("image")],async function (req
       stock: product.product_stock,
     };
 
-    return res.status(201).json({
-      status: 201,
-      message: 'Product Created',
-      data: data
-    });
+    return success(res, 201, "Product Created", data);
+
   } catch (error) {
-      return res.status(500).json({
-        status: 500,
-        message: 'Internal server error',
-        data: null
-      });
+    return errorResponse(res, 500, "Internal server error");
   }
 })
 
@@ -90,17 +75,10 @@ router.put('/:id',[authToken, isAdmin, upload.single("image")],async function (r
       stock: product.product_stock,
     };
 
-    return res.status(200).json({
-      status: 200,
-      message: 'Product Update Successfully',
-      data: data
-    });
+    return success(res, 200, "Product Update Successfully", data);
+
   } catch (error) {
-      return res.status(500).json({
-        status: 500,
-        message: 'Internal server error',
-        data: null
-      });
+    return errorResponse(res, 500, "Internal server error")
   }
 })
 
@@ -120,31 +98,15 @@ router.delete('/:id', [authToken, isAdmin], async function (req, res, next) {
     );
 
     if (!product) {
-      return res.status(400).json({
-        status: 400,
-        message: 'Product not found',
-        data: null
-      });
+      return errorResponse(res, 400, "Product not found");
     }
-
-    return res.status(200).json({
-      status: 200,
-      message: 'Product Delete Successfully',
-      data: {
+      return success(res, 200, "Product Delete Successfully", {
         product_id: product._id,
         product_name: product.product_name,
         product_status: product.product_status
-      }
-    });
-
+    })
   } catch (error) {
-    console.log(error);
-
-    return res.status(500).json({
-      status: 500,
-      message: 'Internal server error',
-      data: null
-    });
+    return errorResponse(res, 500, "Internal server error");
   }
 });
 
@@ -154,23 +116,14 @@ router.get('/:id',async function (req, res,) {
     const { id } = req.params
     const products = await productSchema.findOne({_id: id,})
 
-    res.status(200).json({
-      status: 200,
-      message: 'success',
-      data: products
-    })
+    return success(res, 200, "success", products);
 
   } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      status: 500,
-      message: 'Internal server error',
-      data: null
-    })
+    return errorResponse(res, 500, "Internal server error");
   }
 })
 
-//[GET] /api/products/:id/orders
+//[GET] /api/v1/products/:id/orders
 router.get('/:id/orders', async function (req, res, next) {
   try {
     const { id } = req.params;
@@ -179,23 +132,14 @@ router.get('/:id/orders', async function (req, res, next) {
       'products.product_id': id
     });
 
-    return res.status(200).json({
-      status: 200,
-      message: 'success',
-      data: orders
-    });
+    return success(res, 200, "success", orders);
 
   } catch (error) {
-    console.log(error);
-
-    return res.status(500).json({
-      status: 500,
-      message: 'Internal server error',
-      data: null
-    });
+    return errorResponse(res, 500, "Internal server error");
   }
 });
 
+//[POST] /apt/v1/prpducts/:id/orders
 router.post('/:id/orders', [authToken], async function (req, res, next) {
   try {
     const { id } = req.params;
@@ -207,19 +151,11 @@ router.post('/:id/orders', [authToken], async function (req, res, next) {
     });
 
     if (!product) {
-      return res.status(400).json({
-        status: 400,
-        message: 'Product not found',
-        data: null
-      });
+      return errorResponse(res, 400, "Product not found");
     }
 
     if (quantity > product.product_stock) {
-      return res.status(400).json({
-        status: 400,
-        message: 'Order quantity exceeds product stock',
-        data: null
-      });
+      return errorResponse(res, 400, "Order quantity exceeds product stock")
     }
 
     const order = await orderSchema.create({
@@ -239,20 +175,10 @@ router.post('/:id/orders', [authToken], async function (req, res, next) {
 
     await product.save();
 
-    return res.status(201).json({
-      status: 201,
-      message: 'Order Created',
-      data: order
-    });
+    return success(res, 201, "Order Created", order);
 
   } catch (error) {
-    console.log(error);
-
-    return res.status(500).json({
-      status: 500,
-      message: 'Internal server error',
-      data: null
-    });
+    return errorResponse(res, 500, "Internal server error");
   }
 });
 

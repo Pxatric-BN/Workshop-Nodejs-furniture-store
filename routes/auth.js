@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const jwt = require('jsonwebtoken')
-
+const { success, errorResponse } = require('../utils/response')
 const userSchema = require('../models/users.model');
 
 // [POST]/api/v1/register
@@ -11,21 +11,13 @@ router.post('/register', async function (req, res, next) {
     const { username, password, first_name, last_name, age, email } = req.body
 
     if (!username || !password) {
-            return res.status(400).json({
-                status: 400,
-                message: 'Username and password are required',
-                data: null
-            });
+            return errorResponse(res, 400, "Username and Password are required");
         }
 
     const existingUser = await userSchema.findOne({ username });
 
         if (existingUser) {
-            return res.status(400).json({
-                status: 400,
-                message: 'Username already exists',
-                data: null
-            });
+            return errorResponse(res,400,"Username already exists");
         }
     
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -49,17 +41,10 @@ router.post('/register', async function (req, res, next) {
         role: user.role
     };
 
-    return res.status(201).json({
-        status: 201,
-        message: 'Register successfully',
-        data: data
-    });
+    return success(res, 201, "register successfully", data);
+
   } catch (error) {
-   return res.status(500).json({
-        status: 500,
-        message: 'Internal server error',
-        data: null
-    });
+    return errorResponse(res, 500, "Internal server error");
   }
 })
 
@@ -69,41 +54,25 @@ router.post('/login', async function (req, res, next) {
         const { username, password } = req.body;
 
         if (!username || !password) {
-            return res.status(400).json({
-                status: 400,
-                message: 'Username and password are required',
-                data: null
-            });
+            return errorResponse(res, 400, "Username and password are required");
         }
 
         const user = await userSchema.findOne({ username });
 
         if (!user) {
-            return res.status(400).json({
-                status: 400,
-                message: 'Invalid username or password',
-                data: null
-            });
+            return errorResponse(res, 400,"Invalid username or password");
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(400).json({
-                status: 400,
-                message: 'Invalid username or password',
-                data: null
-            });
+            return errorResponse(res, 400, "Invalid username or password");
         }
 
-        // Check approval
         if (!user.isApprove) {
-            return res.status(401).json({
-                status: 401,
-                message: 'Your account is waiting for approval',
-                data: null
-            });
+            return errorResponse(res, 401,"Your account is waiting for approval");
         }
+
         const token = jwt.sign(
             {
                 userId: user._id,
@@ -116,23 +85,15 @@ router.post('/login', async function (req, res, next) {
             }
         );
 
-        return res.status(200).json({
-            status: 200,
-            message: 'Login successfully',
-            data: {
-                token,
-                _id: user._id,
-                username: user.username,
-                role: user.role
-            }
+        return success(res, 200, 'Login successfully', {
+            token,
+            _id: user._id,
+            username: user.username,
+            role: user.role
         });
 
     } catch (error) {
-        return res.status(500).json({
-            status: 500,
-            message: 'Internal server error',
-            data: null
-        });
+        return errorResponse(res, 500, "Internal Server error")
     }
 });
 

@@ -2,25 +2,17 @@ const express = require('express');
 const router = express.Router();
 const userSchema = require('../models/users.model')
 const {authToken, isAdmin} = require('../middleware/auth.middleware.js')
+const { success, errorResponse } = require('../utils/response')
+
 /* GET users listing. */
 router.get('/', async function (req, res, next) {
   try {
-    let users = await userSchema.find({})
+    const users = await userSchema.find({})
 
-    res.status(200).json({
-      status: 200,
-      message: 'success',
-      data: users
-    })
+    return  success(res, 200, "success", users);
 
   } catch (error) {
-    console.log(error)
-
-    res.status(500).json({
-      status: 500,
-      message: 'Internal server error',
-      data: null
-    })
+    return errorResponse(res, 500, "Internal server error");
   }
 })
 
@@ -31,32 +23,18 @@ router.put('/:id/approve',[authToken,isAdmin], async function (req, res, next) {
             { isApprove: true },
             { new: true }
         );
-
         if (!user) {
-            return res.status(400).json({
-                status: 400,
-                message: 'User not found',
-                data: null
-            });
+            return errorResponse(res, 400, "User not found");
         }
 
-        return res.status(200).json({
-            status: 200,
-            message: 'User approved successfully',
-            data: {
-                _id: user._id,
-                username: user.username,
-                isApprove: user.isApprove
-            }
-        });
+        return success(res, 200, "User approved successfully",{
+            _id: user._id,
+            username: user.username,
+            isApprove: user.isApprove
+        })
 
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            status: 500,
-            message: 'Internal server error',
-            data: null
-        });
+        return errorResponse(res, 500, "Internal server error");
     }
 });
 

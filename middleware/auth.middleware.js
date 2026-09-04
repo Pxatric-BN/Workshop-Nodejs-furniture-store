@@ -1,15 +1,12 @@
 const jwt = require('jsonwebtoken');
+const { success, errorResponse } = require('../utils/response')
 
 const authToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1]; 
 
     if (!token) {
-        return res.status(401).json({
-            status: 401,
-            message: "Access Denied: No Token Provided!",
-            data: null
-        });
+        return errorResponse(res, 401, "Access Denied: No Token Provided!" );
     }
 
     try {
@@ -17,11 +14,7 @@ const authToken = (req, res, next) => {
         req.user = decoded; 
         next();
     } catch (error) {
-        return res.status(403).json({
-            status: 403,
-            message: "Invalid Token",
-            data: null
-        });
+        return errorResponse(res, 403, "Invalid Token");
     }
 };
 
@@ -29,11 +22,7 @@ const isAdmin = (req, res, next) => {
      if (req.user && req.user.role === 'admin') {
         next();
     } else {
-        return res.status(403).json({
-            status: 403,
-            message: "Access Denied: Admin role required",
-            data: null
-        });
+        return errorResponse(res, 403, "Access Denied: Admin role required");
     }
 };
 
