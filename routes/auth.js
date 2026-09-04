@@ -55,7 +55,11 @@ router.post('/register', async function (req, res, next) {
         data: data
     });
   } catch (error) {
-   
+   return res.status(500).json({
+        status: 500,
+        message: 'Internal server error',
+        data: null
+    });
   }
 })
 
@@ -124,8 +128,6 @@ router.post('/login', async function (req, res, next) {
         });
 
     } catch (error) {
-        console.error(error);
-
         return res.status(500).json({
             status: 500,
             message: 'Internal server error',
