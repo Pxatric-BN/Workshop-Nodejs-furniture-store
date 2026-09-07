@@ -145,17 +145,32 @@ router.post('/:id/orders', [authToken], async function (req, res, next) {
     const { id } = req.params;
     const { quantity } = req.body;
 
-    const product = await productSchema.findOne({
-      _id: id,
-      product_status: true
-    });
-
-    if (!product) {
-      return errorResponse(res, 400, "Product not found");
+    if (!quantity || quantity <= 0) {
+      return errorResponse(res, 400, "Invalid quantity");
     }
 
-    if (quantity > product.product_stock) {
-      return errorResponse(res, 400, "Order quantity exceeds product stock")
+    const product = await productSchema.findOneAndUpdate(
+      {
+        _id: id,
+        product_status: true,
+        product_stock: { $gte: quantity }
+      },
+      {
+        $inc: {
+          product_stock: -quantity
+        }
+      },
+      {
+        new: true
+      }
+    );
+
+    if (!product) {
+      return errorResponse(
+        res,
+        400,
+        "Product not found "
+      );
     }
 
     const order = await orderSchema.create({
@@ -170,14 +185,10 @@ router.post('/:id/orders', [authToken], async function (req, res, next) {
       total_price: product.product_price * quantity
     });
 
-
-    product.product_stock -= quantity;
-
-    await product.save();
-
     return success(res, 201, "Order Created", order);
 
   } catch (error) {
+    console.error(error);
     return errorResponse(res, 500, "Internal server error");
   }
 });
