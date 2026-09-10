@@ -89,7 +89,8 @@ router.post('/login', async function (req, res, next) {
             token,
             _id: user._id,
             username: user.username,
-            role: user.role
+            role: user.role,
+            isApprove: user.isApprove
         });
 
     } catch (error) {

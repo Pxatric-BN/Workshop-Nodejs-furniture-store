@@ -23,8 +23,16 @@ const productSchema = new Schema(
             required: true
         },
         product_status:{
-             type: Boolean,
+            type: Boolean,
             default: true
+        },
+        product_category:{
+            type: String,
+            required: true
+        },
+        product_image: {
+            type: String,
+            required: true
         }
     },
     {

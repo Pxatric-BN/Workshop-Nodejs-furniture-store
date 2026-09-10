@@ -16,6 +16,7 @@ router.get('/', async function (req, res, next) {
   }
 })
 
+//[PUT] /api/v1/users/:id/approve
 router.put('/:id/approve',[authToken,isAdmin], async function (req, res, next) {
     try {
         const user = await userSchema.findByIdAndUpdate(
