@@ -3,7 +3,7 @@ const router = express.Router();
 const productSchema = require('../models/products.model')
 const orderSchema = require('../models/orders.model.js')
 const multer = require('multer')
-const {authToken, isAdmin,isApprove} = require('../middleware/auth.middleware.js')
+const {authToken, isAdmin} = require('../middleware/auth.middleware.js')
 const { success, errorResponse } = require('../utils/response')
 
 
