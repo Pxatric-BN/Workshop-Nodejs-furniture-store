@@ -3,8 +3,9 @@ const router = express.Router();
 const productSchema = require('../models/products.model')
 const orderSchema = require('../models/orders.model.js')
 const multer = require('multer')
-const {authToken, isAdmin} = require('../middleware/auth.middleware.js')
+const {authToken, isAdmin,isApprove} = require('../middleware/auth.middleware.js')
 const { success, errorResponse } = require('../utils/response')
+
 
 
 const storage = multer.diskStorage({
@@ -17,6 +18,7 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({ storage: storage})
+
 // [GET] /api/v1/products
 router.get('/',async function (req, res, next) {
   try {
@@ -32,13 +34,15 @@ router.get('/',async function (req, res, next) {
 //[POST] /api/v1/products
 router.post('/',[authToken, isAdmin, upload.single("image")],async function (req, res, next) {
   try {
-    const { product_name, product_description, product_price,product_stock } = req.body
+    const { product_name, product_description, product_price,product_stock, product_category, product_image } = req.body
 
     const product = await productSchema.create({
       product_name,
       product_description,
       product_price,
       product_stock,
+      product_category,
+      product_image
     });
 
     const data = {
@@ -46,6 +50,8 @@ router.post('/',[authToken, isAdmin, upload.single("image")],async function (req
       product_description: product.product_description,
       product_price: product.product_price,
       stock: product.product_stock,
+      product_category: product.product_category,
+      product_image: product.product_image
     };
 
     return success(res, 201, "Product Created", data);
@@ -59,13 +65,15 @@ router.post('/',[authToken, isAdmin, upload.single("image")],async function (req
 router.put('/:id',[authToken, isAdmin, upload.single("image")],async function (req, res, next) {
   try {
     const { id } = req.params
-    const { product_name, product_description, product_price,product_stock } = req.body
+    const { product_name, product_description, product_price,product_stock, product_category, product_image } = req.body
 
     const product = await productSchema.findByIdAndUpdate(id,{
       product_name,
       product_description,
       product_price,
       product_stock,
+      product_category,
+      product_image
     },{new: true});
 
     const data = {
@@ -73,6 +81,8 @@ router.put('/:id',[authToken, isAdmin, upload.single("image")],async function (r
       product_description: product.product_description,
       product_price: product.product_price,
       stock: product.product_stock,
+      product_category: product.product_category,
+      product_image: product.product_image
     };
 
     return success(res, 200, "Product Update Successfully", data);
